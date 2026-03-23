@@ -34,4 +34,5 @@ jmx/jmx_prometheus_javaagent.jar
 # Personal phase notes
 docs/phase*.txt
 docs/phase*.md
-EOF
+EOFquantifier/quantifier.py
+judge/policies/preflight.rego
