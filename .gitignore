@@ -1,0 +1,37 @@
+cat > .gitignore << 'EOF'
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+
+# SSH keys
+*.pem
+*.key
+.env
+
+# Python
+judge/venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated data
+actor/injection_log.json
+quantifier/score_history.json
+healer/heal_log.json
+
+# Mac
+.DS_Store
+
+# MCAC (unused)
+mcac/
+
+# JMX jar (large binary)
+jmx/jmx_prometheus_javaagent.jar
+
+# Personal phase notes
+docs/phase*.txt
+docs/phase*.md
+EOF

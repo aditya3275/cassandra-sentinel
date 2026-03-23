@@ -1,0 +1,130 @@
+services:
+
+  cassandra-node1:
+    image: cassandra:4.1
+    container_name: cassandra-node1
+    hostname: cassandra-node1
+    ports:
+      - "9042:9042"
+      - "9103:9103"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=SentinelCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=512M
+      - JVM_EXTRA_OPTS=-javaagent:/jmx/jmx_prometheus_javaagent.jar=9103:/jmx/cassandra-jmx-config.yml
+    volumes:
+      - cassandra-node1-data:/var/lib/cassandra
+      - ./jmx:/jmx
+    networks:
+      - cassandra-net
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  cassandra-node2:
+    image: cassandra:4.1
+    container_name: cassandra-node2
+    hostname: cassandra-node2
+    ports:
+      - "9104:9103"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=SentinelCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra-node1
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=512M
+      - JVM_EXTRA_OPTS=-javaagent:/jmx/jmx_prometheus_javaagent.jar=9103:/jmx/cassandra-jmx-config.yml
+    volumes:
+      - cassandra-node2-data:/var/lib/cassandra
+      - ./jmx:/jmx
+    networks:
+      - cassandra-net
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  cassandra-node3:
+    image: cassandra:4.1
+    container_name: cassandra-node3
+    hostname: cassandra-node3
+    ports:
+      - "9105:9103"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=SentinelCluster
+      - CASSANDRA_DC=dc1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra-node1
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=512M
+      - JVM_EXTRA_OPTS=-javaagent:/jmx/jmx_prometheus_javaagent.jar=9103:/jmx/cassandra-jmx-config.yml
+    volumes:
+      - cassandra-node3-data:/var/lib/cassandra
+      - ./jmx:/jmx
+    networks:
+      - cassandra-net
+    depends_on:
+      cassandra-node2:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - cassandra-net
+    depends_on:
+      - cassandra-node1
+      - cassandra-node2
+      - cassandra-node3
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=sentinel
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - cassandra-net
+    depends_on:
+      - prometheus
+
+volumes:
+  cassandra-node1-data:
+  cassandra-node2-data:
+  cassandra-node3-data:
+  grafana-data:
+
+
+networks:
+  cassandra-net:
+    driver: bridge

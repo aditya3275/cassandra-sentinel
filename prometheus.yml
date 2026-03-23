@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'cassandra-node1'
+    static_configs:
+      - targets: ['cassandra-node1:9103']
+        labels:
+          node: 'node1'
+
+  - job_name: 'cassandra-node2'
+    static_configs:
+      - targets: ['cassandra-node2:9103']
+        labels:
+          node: 'node2'
+
+  - job_name: 'cassandra-node3'
+    static_configs:
+      - targets: ['cassandra-node3:9103']
+        labels:
+          node: 'node3'

@@ -1,0 +1,87 @@
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+
+rules:
+  # SSTable count per table
+  - pattern: 'org.apache.cassandra.metrics<type=Table, keyspace=(\S*), scope=(\S*), name=LiveSSTableCount><>Value'
+    name: cassandra_table_live_sstable_count
+    labels:
+      keyspace: $1
+      table: $2
+
+  # Read latency
+  - pattern: 'org.apache.cassandra.metrics<type=Table, keyspace=(\S*), scope=(\S*), name=ReadLatency><>(\w+)'
+    name: cassandra_table_read_latency
+    labels:
+      keyspace: $1
+      table: $2
+      quantile: $3
+
+  # Write latency
+  - pattern: 'org.apache.cassandra.metrics<type=Table, keyspace=(\S*), scope=(\S*), name=WriteLatency><>(\w+)'
+    name: cassandra_table_write_latency
+    labels:
+      keyspace: $1
+      table: $2
+      quantile: $3
+
+  # Pending compactions
+  - pattern: 'org.apache.cassandra.metrics<type=Table, keyspace=(\S*), scope=(\S*), name=PendingCompactions><>Value'
+    name: cassandra_table_pending_compactions
+    labels:
+      keyspace: $1
+      table: $2
+
+  # Disk usage per table
+  - pattern: 'org.apache.cassandra.metrics<type=Table, keyspace=(\S*), scope=(\S*), name=LiveDiskSpaceUsed><>Count'
+    name: cassandra_table_live_disk_space_used_bytes
+    labels:
+      keyspace: $1
+      table: $2
+
+  # Hints in progress (hinted handoff)
+  - pattern: 'org.apache.cassandra.metrics<type=Storage, name=TotalHints><>Count'
+    name: cassandra_storage_total_hints
+
+  # Active hints being delivered
+  - pattern: 'org.apache.cassandra.metrics<type=Storage, name=TotalHintsInProgress><>Count'
+    name: cassandra_storage_hints_in_progress
+
+  # Dropped messages (sign of overload)
+  - pattern: 'org.apache.cassandra.metrics<type=DroppedMessage, scope=(\S*), name=Dropped><>(\w+)'
+    name: cassandra_dropped_messages
+    labels:
+      message_type: $1
+      quantile: $2
+
+  # Node wide read latency
+  - pattern: 'org.apache.cassandra.metrics<type=ClientRequest, scope=Read, name=Latency><>(\w+)'
+    name: cassandra_client_read_latency
+    labels:
+      quantile: $1
+
+  # Node wide write latency
+  - pattern: 'org.apache.cassandra.metrics<type=ClientRequest, scope=Write, name=Latency><>(\w+)'
+    name: cassandra_client_write_latency
+    labels:
+      quantile: $1
+
+  # Unavailable exceptions (consistency failures)
+  - pattern: 'org.apache.cassandra.metrics<type=ClientRequest, scope=(\S*), name=Unavailables><>(\w+)'
+    name: cassandra_client_request_unavailables
+    labels:
+      request_type: $1
+      quantile: $2
+
+  # Timeouts
+  - pattern: 'org.apache.cassandra.metrics<type=ClientRequest, scope=(\S*), name=Timeouts><>(\w+)'
+    name: cassandra_client_request_timeouts
+    labels:
+      request_type: $1
+      quantile: $2
+
+  # Heap memory usage
+  - pattern: 'java.lang<type=Memory><HeapMemoryUsage>(\w+)'
+    name: cassandra_jvm_heap_memory_bytes
+    labels:
+      type: $1

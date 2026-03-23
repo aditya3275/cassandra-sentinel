@@ -1,0 +1,14 @@
+{
+    "cluster_name": "SentinelCluster",
+    "expected_nodes": [
+        "cassandra-node1",
+        "cassandra-node2",
+        "cassandra-node3"
+    ],
+    "replication_factor": 3,
+    "keyspace": "sentinel",
+    "min_nodes_up": 3,
+    "max_hints_in_progress": 100,
+    "max_pending_compactions": 10,
+    "min_resilience_score": 0.6
+}
