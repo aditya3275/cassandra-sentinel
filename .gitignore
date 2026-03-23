@@ -36,3 +36,9 @@ docs/phase*.txt
 docs/phase*.md
 EOFquantifier/quantifier.py
 judge/policies/preflight.rego
+
+
+docs/fullstory.txt
+docs/commands.txt
+docs/phase8.txt
+docs/phase9.txt
